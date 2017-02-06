@@ -1,0 +1,35 @@
+# Overview
+
+Use Ansible and Vagrant to build a load balancer, behind which run two nginx applications which return hello world and the private ip address of the they belong to.
+
+# Solution
+
+Adopted a KISS approach ( keep it simple stupid ). The host box only has vagrant installed and therefore the ansible_local vagrant provisioner has been chosen.
+
+This will install the latest version of Ansible on each host and run the playbook on the host machine.
+
+In order to keep the solution simple no existing roles have been included, as most roles tend to do "too much" and don't solve this specific problem elegantly.
+
+As this is a Vagrant box, presumably just for a test/training environment security has not been considered. There are no firewalls / backup scripts for the box.
+
+If this were to be moved from a test environment to a production product it would be strongly recommended to secure this system further using iptables,ferm,fail2ban etc.
+
+Testing the application will be via the shell provisioner. netcat is assumed to be installed on the host machine for these tests.
+
+The applications for running the "hello world" test will be written in nodejs. Node will be installed as part of the playbook.yml
+
+# Notes on test
+
+- Making nginx idempotent
+
+	- By using ansible apt module to install the nginx server is already created, this step is "idempotent by default as apt-get will not install nginx again once it's installed once"
+
+- Editing the sudoers file
+
+By default a file is placed in /etc/sudoers.d/ called 10_vagrant which sets the vagrant user up with no password. Maybe the test could be changed so a new user has to be created called "deploy" in order to better test this?
+
+The admin group is also set to regain privileges. Maybe a better test would be to lock the system down first, and then only allow sudo privileges as created.
+
+Because of this there are no extra steps in my playbook for performing these tasks.
+
+
