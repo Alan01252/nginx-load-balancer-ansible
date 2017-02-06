@@ -16,7 +16,11 @@ If this were to be moved from a test environment to a production product it woul
 
 Testing the application will be via the shell provisioner. netcat is assumed to be installed on the host machine for these tests.
 
-The applications for running the "hello world" test will be written in nodejs. Node will be installed as part of the playbook.yml
+The applications for running the "hello world" test will be written in nodejs. Node will be installed as part of the playbook.yml.
+
+GIT has been used to version control the scripts
+
+Everything is installed under sudo which isn't best practice but has been done for speed
 
 # Notes on test
 
@@ -37,7 +41,4 @@ Because of this there are no extra steps in my playbook for performing these tas
 # Troubleshooting
 
 Downloading the latest version of node failed due to the url using SNI ( Server Name Indication ). In order to access the URL python needed to be updated to 2.7.9. Installing python 2.7.10 fixes the problem. I used the PPA from Kelix Krull without much thought, there's a lot of warnings about it being supported. In real life I'd of probably compiled python manually, or better still used the latest LTS of Ubuntu
-
-
-
 

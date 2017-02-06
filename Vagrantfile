@@ -12,5 +12,6 @@ Vagrant.configure("2") do |config|
 			ansible.playbook = "playbook.yml"
 	   	 end
 	    web.vm.provision "shell", inline: "nc 192.168.100.100 80 &> /dev/null; if [ $? -eq 0 ]; then echo 'Web Server Up'; else echo 'Web Server Down'; fi"
+	    web.vm.provision "shell", inline: "curl -sS http://192.168.100.100"
 	  end
 end
