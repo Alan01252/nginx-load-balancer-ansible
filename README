@@ -9,6 +9,7 @@ Adopted a KISS approach ( keep it simple stupid ). The host box only has vagrant
 This will install the latest version of Ansible on each host and run the playbook on the host machine.
 
 In order to keep the solution simple no existing roles have been included, as most roles tend to do "too much" and don't solve this specific problem elegantly.
+All ip addresses have been hardcoded everywhere. In real life use of the Ansible inventory file would be preferred as to remove the current duplication.
 
 As this is a Vagrant box, presumably just for a test/training environment security has not been considered. There are no firewalls / backup scripts for the box.
 
@@ -20,7 +21,8 @@ The applications for running the "hello world" test will be written in nodejs. N
 
 GIT has been used to version control the scripts
 
-Everything is installed under sudo which isn't best practice but has been done for speed
+Everything is installed under sudo which isn't best practice but has been done for speed.
+
 
 # Notes on test
 
@@ -42,3 +44,4 @@ Because of this there are no extra steps in my playbook for performing these tas
 
 Downloading the latest version of node failed due to the url using SNI ( Server Name Indication ). In order to access the URL python needed to be updated to 2.7.9. Installing python 2.7.10 fixes the problem. I used the PPA from Kelix Krull without much thought, there's a lot of warnings about it being supported. In real life I'd of probably compiled python manually, or better still used the latest LTS of Ubuntu
 
+Ansible failed to complete when trying to test if pm2 was already running the hello world app on the first run of the script due to an import _unicode step missing. This worked on subsequent versions of ansible. I presume because the version of python installed by default on this box didn't include the _unicode library and the environment wasn't updated after installing the later version of the first run. As a quick fix I split the provisioner in the Vagrant file so that the second time it runs it'll pick up the new environment and run through the ansible correctly. This problem would be better solved by using the latest LTS of Ubuntu.

@@ -1,0 +1,65 @@
+- hosts: all
+  gather_facts: True
+  become: yes
+  become_method: sudo
+
+  tasks:
+
+  - name: Upgrade to python 2.7.10 ( necessary to install nodejs)
+    apt_repository:
+      repo: 'ppa:fkrull/deadsnakes-python2.7'
+
+  - name: Upgrade python
+    apt:
+      name: python2.7
+      state: latest
+      update_cache: yes
+
+  - name: Import the NodeSource GPG key into apt
+    apt_key:
+      id: 68576280
+      url: "https://keyserver.ubuntu.com/pks/lookup?op=get&fingerprint=on&search=0x1655A0AB68576280"
+    tags:
+      - node
+      - download_node
+
+  - name: Download node setup program
+    get_url: url=https://deb.nodesource.com/setup_6.x dest=/tmp/nodeinstall mode=0700
+    tags:
+      - node
+      - download_node
+
+  - name: Run node setup
+    shell: "/tmp/nodeinstall"
+    tags:
+      - node
+      - install_node
+
+  - name: Install node
+    apt:
+      name: nodejs
+      state: present
+      update_cache: yes
+    tags:
+      - install_node
+
+  - name: install pm2 process manager for node
+    npm: name=pm2 global=yes
+    tags:
+      - pm2_install
+
+  - name: start pm2
+    shell: pm2 l
+    tags:
+      - pm2_install
+
+
+  - name: install nginx
+    apt:
+      name: nginx
+      state: present
+      update_cache: yes
+    tags:
+       - install_nginx
+
+# vim:ft=ansible:
