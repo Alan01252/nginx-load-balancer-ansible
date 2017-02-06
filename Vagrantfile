@@ -45,6 +45,10 @@ Vagrant.configure("2") do |config|
 			ansible.playbook = "node.yml"
 	   	 end
 	    web.vm.provision "shell", inline: "curl -sS http://192.168.100.102"
+	    ## Basic testing of all web servers here, relies on user to look at output for different ip addresses, could be smarter
+	    web.vm.provision "shell", inline: "for i in {1..3}; do curl -sS http://192.168.100.100; done"
+	    web.vm.provision "shell", inline: "for i in {1..3}; do curl -sS http://192.168.100.101; done"
+	    web.vm.provision "shell", inline: "for i in {1..3}; do curl -sS http://192.168.100.102; done"
 	  end
 
 

@@ -6,7 +6,7 @@
   handlers:
 
   - name: restart nginx
-    service: name=nginx state=restarted
+    service: name=nginx state=reloaded
 
   tasks:
 
@@ -33,12 +33,26 @@
     tags:
       - pm2_run
 
+  - name: -restart hello world application running
+    shell: pm2 restart hello-world
+    when: pm2_hello_world_status.stderr != "[PM2][WARN] hello-world doesn't exist"
+    tags:
+      - pm2_run
+
   - name: create start up script for pm2
     command: pm2 save
     tags:
       pm2_run
 
-  - name: install proxy to nodejs
+  - name: install nginx upstreams to hello-world modejs app
+    template:
+      src: templates/etc/nginx/conf.d/upstream_hello_world.conf
+      dest: '/etc/nginx/conf.d/upstream_hello_world.conf'
+      owner: 'root'
+      group: 'root'
+      mode: '0644'
+
+  - name: enable default site pointing to hello-world nodejs app
     template:
       src: 'templates/etc/nginx/sites-available/default'
       dest: '/etc/nginx/sites-available/default'
