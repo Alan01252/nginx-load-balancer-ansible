@@ -20,6 +20,8 @@ The applications for running the "hello world" test will be written in nodejs. N
 
 # Notes on test
 
+- Considering using more recent box. The latest LTS release is 16.04 would be easier ( in terms of package management than the box defined in the test). Maybe the test could be changed to read "install the latest LTS support of ubutnu" rather than a specific box name.
+
 - Making nginx idempotent
 
 	- By using ansible apt module to install the nginx server is already created, this step is "idempotent by default as apt-get will not install nginx again once it's installed once"
@@ -31,5 +33,11 @@ By default a file is placed in /etc/sudoers.d/ called 10_vagrant which sets the 
 The admin group is also set to regain privileges. Maybe a better test would be to lock the system down first, and then only allow sudo privileges as created.
 
 Because of this there are no extra steps in my playbook for performing these tasks.
+
+# Troubleshooting
+
+Downloading the latest version of node failed due to the url using SNI ( Server Name Indication ). In order to access the URL python needed to be updated to 2.7.9. Installing python 2.7.10 fixes the problem. I used the PPA from Kelix Krull without much thought, there's a lot of warnings about it being supported. In real life I'd of probably compiled python manually, or better still used the latest LTS of Ubuntu
+
+
 
 
