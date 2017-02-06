@@ -29,22 +29,14 @@ GIT has been used to version control the scripts
 
 Everything is installed under sudo which isn't best practice but has been done for speed.
 
+# How to run
 
-# Notes on test
+On a box with vagrant / curl and netcat installed
 
-- Considering using more recent box. The latest LTS release is 16.04 would be easier ( in terms of package management than the box defined in the test). Maybe the test could be changed to read "install the latest LTS support of ubutnu" rather than a specific box name.
+- tar -xvf automation-logic-test.tar.gz
+- vagrant up
 
-- Making nginx idempotent
 
-	- By using ansible apt module to install the nginx server is already created, this step is "idempotent by default as apt-get will not install nginx again once it's installed once"
-
-- Editing the sudoers file
-
-By default a file is placed in /etc/sudoers.d/ called 10_vagrant which sets the vagrant user up with no password. Maybe the test could be changed so a new user has to be created called "deploy" in order to better test this?
-
-The admin group is also set to regain privileges. Maybe a better test would be to lock the system down first, and then only allow sudo privileges as created.
-
-Because of this there are no extra steps in my playbook for performing these tasks.
 
 # Troubleshooting
 
@@ -64,4 +56,23 @@ Things that I deemed out of scope for this example but could be expanded in futu
 - Automated tests for the nodejs application
 - Multiple nodejs applications over multiple cores with one nodejs balancer in front of them
 - Improvements to the ansible for speed ( for example there's no need to keep running the node install script )
+- Make the hello-world application more interesting
+
+
+# Notes on test
+
+- Considering using more recent box. The latest LTS release is 16.04 would be easier ( in terms of package management than the box defined in the test). Maybe the test could be changed to read "install the latest LTS support of ubutnu" rather than a specific box name.
+
+- Making nginx idempotent
+
+	- By using ansible apt module to install the nginx server is already created, this step is "idempotent by default as apt-get will not install nginx again once it's installed once"
+
+- Editing the sudoers file
+
+By default a file is placed in /etc/sudoers.d/ called 10_vagrant which sets the vagrant user up with no password. Maybe the test could be changed so a new user has to be created called "deploy" in order to better test this?
+
+The admin group is also set to regain privileges. Maybe a better test would be to lock the system down first, and then only allow sudo privileges as created.
+
+Because of this there are no extra steps in my playbook for performing these tasks.
+
 
