@@ -34,6 +34,10 @@
     tags:
       - install_hello_world_application
 
+  - name: make /srv/opt/ folder with permissions for www-data
+    file: path="/srv/opt/" state=directory recurse=true owner='www-data' group='www-data'
+    tags:
+      - install_hello_world_application
 
   - name: start hello world application running
     shell: LOCAL_USER={{current_user}} pm2 start /srv/opt/hello-world.js -x --name hello-world
