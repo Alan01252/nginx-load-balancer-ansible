@@ -5,51 +5,42 @@ Vagrant.configure("2") do |config|
 
  config.vm.box = "puppetlabs/ubuntu-14.04-64-nocm"
 
-	  config.vm.define "web1" do |web|
+	  (1..2).each do |i|
+		  config.vm.define "node-app-server-#{i}" do |web|
+		    web.vm.hostname = "node-app-server-#{i}"
+		    web.vm.network :private_network, ip: "192.168.100.10#{i}"
+		end
+	  end
+
+
+	  config.vm.define "loadbalancer" do |web|
+            # Configure load balancer
 	    web.vm.network :private_network, ip: "192.168.100.100"
 	    web.vm.provision "ansible_local" do |ansible|
 			ansible.verbose = "v"
-			ansible.playbook = "setup.yml"
+			ansible.playbook = "loadbalancer.yml"
+			ansible.inventory_path = "vagrant-hosts"
+			ansible.limit = "loadbalancer"
 	   	 end
 	    web.vm.provision "shell", inline: "nc 192.168.100.100 80 &> /dev/null; if [ $? -eq 0 ]; then echo 'Web Server Up'; else echo 'Web Server Down'; fi"
-	    web.vm.provision "ansible_local" do |ansible|
-			ansible.verbose = "v"
-			ansible.playbook = "node.yml"
-	   	 end
-	    web.vm.provision "shell", inline: "curl -sS http://192.168.100.100"
-	  end
 
-	  config.vm.define "web2" do |web|
-	    web.vm.network :private_network, ip: "192.168.100.101"
+	    ## Configure app servers
 	    web.vm.provision "ansible_local" do |ansible|
-			ansible.verbose = "v"
-			ansible.playbook = "setup.yml"
-	   	 end
-	    web.vm.provision "shell", inline: "nc 192.168.100.101 80 &> /dev/null; if [ $? -eq 0 ]; then echo 'Web Server Up'; else echo 'Web Server Down'; fi"
+				ansible.verbose = "v"
+				ansible.playbook = "node-setup.yml"
+				ansible.limit = "application-servers"
+				ansible.inventory_path = "vagrant-hosts"
+		 end
 	    web.vm.provision "ansible_local" do |ansible|
-			ansible.verbose = "v"
-			ansible.playbook = "node.yml"
-	   	 end
-	    web.vm.provision "shell", inline: "curl -sS http://192.168.100.101"
-	  end
-
-	  config.vm.define "web3" do |web|
-	    web.vm.network :private_network, ip: "192.168.100.102"
-	    web.vm.provision "ansible_local" do |ansible|
-			ansible.verbose = "v"
-			ansible.playbook = "setup.yml"
-	   	 end
-	    web.vm.provision "shell", inline: "nc 192.168.100.102 80 &> /dev/null; if [ $? -eq 0 ]; then echo 'Web Server Up'; else echo 'Web Server Down'; fi"
-	    web.vm.provision "ansible_local" do |ansible|
-			ansible.verbose = "v"
-			ansible.playbook = "node.yml"
-	   	 end
-	    web.vm.provision "shell", inline: "curl -sS http://192.168.100.102"
-	    ## Basic testing of all web servers here, relies on user to look at output for different ip addresses, could be smarter
+				ansible.verbose = "v"
+				ansible.playbook = "node-app.yml"
+				ansible.limit = "application-servers"
+				ansible.inventory_path = "vagrant-hosts"
+				ansible.extra_vars = {
+					current_user: ENV['USER']
+				}
+		 end
 	    web.vm.provision "shell", inline: "for i in {1..3}; do curl -sS http://192.168.100.100; done"
-	    web.vm.provision "shell", inline: "for i in {1..3}; do curl -sS http://192.168.100.101; done"
-	    web.vm.provision "shell", inline: "for i in {1..3}; do curl -sS http://192.168.100.102; done"
 	  end
-
 
 end
