@@ -40,6 +40,8 @@ Vagrant.configure("2") do |config|
 					current_user: ENV['USER']
 				}
 		 end
+
+	    web.vm.provision "shell", inline: "echo Making three requests to the loadbalancer on 192.168.100.100"
 	    web.vm.provision "shell", inline: "for i in {1..3}; do curl -sS http://192.168.100.100; done"
 	  end
 
