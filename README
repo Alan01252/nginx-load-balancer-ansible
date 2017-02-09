@@ -15,7 +15,7 @@ Adopted a KISS approach ( keep it simple stupid ). The host box only has vagrant
 This will install the latest version of Ansible on each host and run the playbook on the host machine.
 
 In order to keep the solution simple no existing roles have been included, as most roles tend to do "too much" and don't solve this specific problem elegantly.
-All ip addresses have been hardcoded everywhere. In real life use of the Ansible inventory file would be preferred as to remove the current duplication.
+All ip addresses have been hardcoded in the vagrant file, although are dynamic when running from the inventory file making it easy to move from production to staging. 
 
 As this is a Vagrant box, presumably just for a test/training environment security has not been considered. There are no firewalls / backup scripts for the box.
 
@@ -23,7 +23,7 @@ If this were to be moved from a test environment to a production product it woul
 
 Testing the application will be via the shell provisioner. netcat is assumed to be installed on the host machine for these tests.
 
-The applications for running the "hello world" test will be written in nodejs. Node will be installed as part of the playbook.yml.
+The applications for running the "hello world" test will be written in nodejs. Node will be installed in two parts. node-setup.yml and node-app.yml
 
 GIT has been used to version control the scripts
 
@@ -36,27 +36,28 @@ On a box with vagrant / curl and netcat installed
 - tar -xvf automation-logic-test.tar.gz
 - vagrant up
 
-
-
 # Troubleshooting
 
 Downloading the latest version of node failed due to the url using SNI ( Server Name Indication ). In order to access the URL python needed to be updated to 2.7.9. Installing python 2.7.10 fixes the problem. I used the PPA from Kelix Krull without much thought, there's a lot of warnings about it being supported. In real life I'd of probably compiled python manually, or better still used the latest LTS of Ubuntu
 
 Ansible failed to complete when trying to test if pm2 was already running the hello world app on the first run of the script due to an import _unicode step missing. This worked on subsequent versions of ansible. I presume because the version of python installed by default on this box didn't include the _unicode library and the environment wasn't updated after installing the later version of the first run. As a quick fix I split the provisioner in the Vagrant file so that the second time it runs it'll pick up the new environment and run through the ansible correctly. This problem would be better solved by using the latest LTS of Ubuntu.
 
+I've deliberately disabled strict host key checking with this solution.
+
 # Further work
 
 Things that I deemed out of scope for this example but could be expanded in future
 
+- I could have written some ruby in the vagrant file which pulled the ip addresses out of the inventory file, this would have meant ip addresses only exist in one place and the most appropriate place too.
 - Security, firewalls, locking down users etc
 - Proper use of ansible using inventory files / group vars
-	- This would also allow asynchronous creation of the machines
 - Logging
 - Server monitoring ( check_mk / nagios etc )
 - Automated tests for the nodejs application
 - Multiple nodejs applications over multiple cores with one nodejs balancer in front of them
 - Improvements to the ansible for speed ( for example there's no need to keep running the node install script )
 - Make the hello-world application more interesting
+- Multiple load balancers. Would be easy to scale with this solution as there's no shared stated between the applications. Round robin dns and you're away
 
 
 # Notes on test
@@ -74,5 +75,9 @@ By default a file is placed in /etc/sudoers.d/ called 10_vagrant which sets the 
 The admin group is also set to regain privileges. Maybe a better test would be to lock the system down first, and then only allow sudo privileges as created.
 
 Because of this there are no extra steps in my playbook for performing these tasks.
+
+- Add a diagram
+
+Working was a bit confusing as to what architecture should be. Really I should have pushed back rather than make an incorrect assumption. A diagram speaks a thousand words though and would be beneficial next time.
 
 
