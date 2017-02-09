@@ -1,0 +1,44 @@
+- hosts: loadbalancer
+  gather_facts: True
+  become: yes
+  become_method: sudo
+
+  handlers:
+
+  - name: restart nginx
+    action: service name=nginx state=restarted
+
+  vars:
+    application_servers: "{{ groups['application-servers'] }}"
+
+  tasks:
+
+
+  - name: install nginx
+    apt:
+      name: nginx
+      state: present
+    tags:
+       - install_nginx
+
+  - name: install nginx upstreams to hello-world modejs app
+    template:
+      src: templates/etc/nginx/conf.d/upstream_hello_world.conf
+      dest: '/etc/nginx/conf.d/upstream_hello_world.conf'
+      owner: 'root'
+      group: 'root'
+      mode: '0644'
+
+  - name: enable default site pointing to hello-world nodejs app
+    template:
+      src: 'templates/etc/nginx/sites-available/default'
+      dest: '/etc/nginx/sites-available/default'
+      owner: 'root'
+      group: 'root'
+      mode: '0644'
+    notify: restart nginx
+    tags:
+      - install_proxy
+
+
+
