@@ -1,0 +1,61 @@
+- hosts: application-servers
+  gather_facts: True
+  become: yes
+  become_method: sudo
+
+  tasks:
+
+  - name: Ensure hostname set
+    hostname: name={{ inventory_hostname }}
+
+  - name: Upgrade to python 2.7.10 ( necessary to install nodejs)
+    apt_repository:
+      repo: 'ppa:fkrull/deadsnakes-python2.7'
+      update_cache: yes
+
+  - name: Upgrade python
+    apt:
+      name: python2.7
+      state: latest
+
+  - name: Check nodejs install
+    command: dpkg-query -W 'nodejs'
+    register: nodejs_check
+    changed_when: false
+    ignore_errors: true
+
+
+  - name: Download node setup program
+    get_url: url=https://deb.nodesource.com/setup_6.x dest=/tmp/nodeinstall mode=0700
+    when: nodejs_check|failed
+    tags:
+      - node
+      - download_node
+
+  - name: Run node setup
+    shell: "/tmp/nodeinstall"
+    when: nodejs_check|failed
+    tags:
+      - node
+      - install_node
+
+  - name: Update apt-cache to install latest version of node
+    apt:
+      update_cache: true
+    when: nodejs_check|failed
+    tags:
+      - install_node
+
+  - name: Install node
+    apt:
+      name: nodejs
+      state: present
+    tags:
+      - install_node
+
+  - name: install pm2 process manager for node
+    npm: name=pm2 global=yes
+    tags:
+      - pm2_install
+
+# vim:ft=ansible:

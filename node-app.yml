@@ -1,0 +1,52 @@
+- hosts: application-servers
+  gather_facts: True
+  become: yes
+  become_method: sudo
+
+  handlers:
+
+  - name: restart hello world
+    shell: pm2 restart hello-world
+    when: pm2_hello_world_status.stderr != "[PM2][WARN] hello-world doesn't exist"
+
+  tasks:
+
+  - name: make /srv/opt/ folder with permissions for www-data
+    file: path="/srv/opt/" state=directory recurse=true owner='www-data' group='www-data'
+    tags:
+      - install_hello_world_application
+
+  - name: check hello-world status
+    shell: pm2 info hello-world
+    register: pm2_hello_world_status
+    changed_when: false
+    ignore_errors: True
+    tags:
+      - pm2_run
+
+  - debug:
+      msg: "Creating hello world applcation just for you {{current_user}}"
+
+  - name: install hello world application
+    template: src=srv/opt/hello-world.js dest=/srv/opt/hello-world.js
+    notify:
+      - restart hello world
+    tags:
+      - install_hello_world_application
+
+
+  - name: start hello world application running
+    shell: LOCAL_USER={{current_user}} pm2 start /srv/opt/hello-world.js -x --name hello-world
+    when: pm2_hello_world_status.stderr == "[PM2][WARN] hello-world doesn't exist"
+    tags:
+      - pm2_run
+
+  - name: create start up script for pm2
+    when: pm2_hello_world_status.stderr == "[PM2][WARN] hello-world doesn't exist"
+    command: pm2 save
+    tags:
+      pm2_run
+
+
+
+# vim:ft=ansible:
